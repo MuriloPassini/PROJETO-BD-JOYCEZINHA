@@ -46,9 +46,17 @@ preco_servico DECIMAL(5,2)
 );
 
 -- tabela para relacionar os prifissionais e o serviço que eles fazem
-CREATE TABLE servicosXfuncionarios (
-id_especialidade INT AUTO_INCREMENT PRIMARY KEY
-);****
+CREATE TABLE especialidadeXprofissional(
+id_especialidade INT AUTO_INCREMENT PRIMARY KEY,
+id_profissional INT NOT NULL,
+id_servico INT NOT NULL,
+
+FOREIGN KEY (id_profissional)
+REFERENCES profissionais(id_profissional),
+
+FOREIGN KEY (id_servico)
+REFERENCES servicos(id_servico)
+);
 
 -- tabela dos clientes
 CREATE TABLE clientes(
@@ -73,6 +81,5 @@ FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente),
 FOREIGN KEY (id_profissional) REFERENCES profissionais(id_profissional)
 );
 
--- fazer lista de servico por profisssional[especialidades] alterando a fk na agenda, especialidades, LGPD , AUDITORIA, 
+-- especialidades, LGPD , AUDITORIA, 
 -- PAGAMENTO, preço por serviço
-
