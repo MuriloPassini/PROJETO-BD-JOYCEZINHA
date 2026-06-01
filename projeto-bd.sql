@@ -24,7 +24,7 @@ cpf_profissional VARCHAR(11) UNIQUE NOT NULL,
 cro VARCHAR(20) UNIQUE NOT NULL,
 email_profissional VARCHAR(100) UNIQUE NOT NULL,
 telefone_profissional VARCHAR(18) UNIQUE NOT NULL,
-pagamento VARCHAR(50) NOT NULL, ****
+pix VARCHAR(50) NOT NULL,
 status BOOLEAN DEFAULT TRUE 
 );
 
@@ -45,7 +45,7 @@ descricao_servico VARCHAR(150),
 preco_servico DECIMAL(5,2)
 );
 
--- tabela para relacionar os prifissionais e o serviço que eles fazem
+-- tabela para relacionar os profissionais e o serviço que eles fazem
 CREATE TABLE especialidadeXprofissional(
 id_especialidade INT AUTO_INCREMENT PRIMARY KEY,
 id_profissional INT NOT NULL,
@@ -81,5 +81,32 @@ FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente),
 FOREIGN KEY (id_profissional) REFERENCES profissionais(id_profissional)
 );
 
--- especialidades, LGPD , AUDITORIA, 
--- PAGAMENTO, preço por serviço
+-- Tabela principal do pagamento 
+CREATE TABLE pagamentos (
+    id_pagamento     INT AUTO_INCREMENT PRIMARY KEY,
+    id_consulta      INT            NOT NULL,
+    id_cliente       INT            NOT NULL,
+    valor_total      DECIMAL(10,2)  NOT NULL,
+    data_pagamento   DATE           NOT NULL,
+    forma_pagamento  ENUM('dinheiro', 'cartao_credito', 'cartao_debito', 'pix', 'boleto') NOT NULL,
+    status           ENUM('pago', 'pendente', 'parcelado') NOT NULL DEFAULT 'pendente',
+    observacao       VARCHAR(255),
+    criado_em        TIMESTAMP      DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (id_consulta) REFERENCES agenda(id_consulta),
+    FOREIGN KEY (id_cliente)  REFERENCES clientes(id_cliente)
+);
+
+-- Detalhamento dos serviços realizados em cada pagamento
+CREATE TABLE pagamento_servicos (
+    id_item          INT AUTO_INCREMENT PRIMARY KEY,
+    id_pagamento     INT            NOT NULL,
+    id_servico       INT            NOT NULL,
+    valor_cobrado    DECIMAL(10,2)  NOT NULL, -- pode diferir do preco_servico (desconto, convênio, etc)
+
+    FOREIGN KEY (id_pagamento) REFERENCES pagamentos(id_pagamento),
+    FOREIGN KEY (id_servico)   REFERENCES servicos(id_servico)
+);
+
+
+-- especialidades, LGPD , AUDITORIA
