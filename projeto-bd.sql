@@ -84,14 +84,14 @@ FOREIGN KEY (id_profissional) REFERENCES profissionais(id_profissional)
 -- Tabela principal do pagamento 
 CREATE TABLE pagamentos (
     id_pagamento     INT AUTO_INCREMENT PRIMARY KEY,
-    id_consulta      INT            NOT NULL,
-    id_cliente       INT            NOT NULL,
-    valor_total      DECIMAL(10,2)  NOT NULL,
-    data_pagamento   DATE           NOT NULL,
+    id_consulta      INT NOT NULL,
+    id_cliente       INT NOT NULL,
+    valor_total      DECIMAL(10,2) NOT NULL,
+    data_pagamento   DATE NOT NULL,
     forma_pagamento  ENUM('dinheiro', 'cartao_credito', 'cartao_debito', 'pix', 'boleto') NOT NULL,
     status           ENUM('pago', 'pendente', 'parcelado') NOT NULL DEFAULT 'pendente',
     observacao       VARCHAR(255),
-    criado_em        TIMESTAMP      DEFAULT CURRENT_TIMESTAMP,
+    criado_em        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (id_consulta) REFERENCES agenda(id_consulta),
     FOREIGN KEY (id_cliente)  REFERENCES clientes(id_cliente)
@@ -100,13 +100,39 @@ CREATE TABLE pagamentos (
 -- Detalhamento dos serviços realizados em cada pagamento
 CREATE TABLE pagamento_servicos (
     id_item          INT AUTO_INCREMENT PRIMARY KEY,
-    id_pagamento     INT            NOT NULL,
-    id_servico       INT            NOT NULL,
+    id_pagamento     INT NOT NULL,
+    id_servico       INT NOT NULL,
     valor_cobrado    DECIMAL(10,2)  NOT NULL, -- pode diferir do preco_servico (desconto, convênio, etc)
 
     FOREIGN KEY (id_pagamento) REFERENCES pagamentos(id_pagamento),
     FOREIGN KEY (id_servico)   REFERENCES servicos(id_servico)
 );
 
+-- Registra toda alteração feita em qualquer tabela importante
+CREATE TABLE auditoria_log (
+    id_log          INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario      INT NULL,                  
+    tabela          VARCHAR(60) NOT NULL,          
+    operacao        ENUM('INSERT', 'UPDATE', 'DELETE') NOT NULL,
+    id_registro     INT NOT NULL,                
+    dados_antes     JSON NULL,                   
+    dados_depois    JSON NULL,                   
+    data_acao       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ip_origem       VARCHAR(45)NULL,
 
--- especialidades, LGPD , AUDITORIA
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+);
+-- Rastreia quem acessou o sistema e quando
+CREATE TABLE auditoria_acesso (
+    id_acesso       INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario      INT NOT NULL,
+    tipo            ENUM('login', 'logout', 'login_falhou') NOT NULL,
+    data_acesso     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ip_origem       VARCHAR(45) NULL,
+    dispositivo     VARCHAR(100) NULL,
+
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+);
+
+
+-- LGPD
